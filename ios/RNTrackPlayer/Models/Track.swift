@@ -10,7 +10,7 @@ import Foundation
 import MediaPlayer
 import AVFoundation
 
-class Track: NSObject, AudioItem, TimePitching, AssetOptionsProviding {
+class Track: NSObject, AudioItem, InitialTiming, TimePitching, AssetOptionsProviding {
     let id: String
     let url: MediaURL
     
@@ -23,6 +23,7 @@ class Track: NSObject, AudioItem, TimePitching, AssetOptionsProviding {
     var duration: Double?
     var skipped: Bool = false
     var artworkURL: MediaURL?
+    var initialTime: TimeInterval = 0.0
     let headers: [String: Any]?
     let pitchAlgorithm: String?
     
@@ -50,6 +51,10 @@ class Track: NSObject, AudioItem, TimePitching, AssetOptionsProviding {
         self.duration = dictionary["duration"] as? Double
         self.headers = dictionary["headers"] as? [String: Any]
         self.artworkURL = MediaURL(object: dictionary["artwork"])
+        let initialTime = dictionary["initialTime"] as? Double
+        if let x = initialTime {
+            self.initialTime = x
+        }
         self.pitchAlgorithm = dictionary["pitchAlgorithm"] as? String
         
         self.originalObject = dictionary
@@ -72,6 +77,11 @@ class Track: NSObject, AudioItem, TimePitching, AssetOptionsProviding {
         self.desc = dictionary["description"] as? String
         self.duration = dictionary["duration"] as? Double
         self.artworkURL = MediaURL(object: dictionary["artwork"])
+        
+        let initialTime = dictionary["initialTime"] as? Double
+        if let x = initialTime {
+            self.initialTime = x
+        }
         
         self.originalObject = self.originalObject.merging(dictionary) { (_, new) in new }
     }
@@ -144,6 +154,11 @@ class Track: NSObject, AudioItem, TimePitching, AssetOptionsProviding {
         }
         
         return [:]
+    }
+
+    // MARK: - InitialTiming Protocol
+    func getInitialTime() -> TimeInterval {
+        return initialTime
     }
     
 }
